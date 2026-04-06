@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RED Platform — Structural Overview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fff7fb;
+      --bg-soft: #fff1f7;
+      --panel: rgba(255,255,255,0.78);
+      --panel-strong: rgba(255,255,255,0.92);
+      --line: rgba(205, 112, 155, 0.18);
+      --line-strong: rgba(205, 112, 155, 0.32);
+      --text: #341b2b;
+      --muted: #7f6073;
+      --accent: #e7a4c3;
+      --accent-strong: #cf739f;
+      --accent-soft: #f8d7e7;
+      --ok: #4c9b7e;
+      --warn: #c5942f;
+      --danger: #c85873;
+      --blue: #6f88d9;
+      --shadow: 0 20px 60px rgba(191, 113, 147, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 214, 232, 0.85), transparent 32%),
+        radial-gradient(circle at top right, rgba(255, 234, 242, 0.8), transparent 26%),
+        linear-gradient(180deg, #fff9fc 0%, #fff5fa 100%);
+      min-height: 100vh;
+    }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.35), transparent 80%);
+      opacity: 0.35;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 32px 20px 72px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .pill, .lang-btn, .tab-btn, .mini-pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: var(--muted);
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: 600 12px/1 JetBrains Mono, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .lang-switcher {
+      display: inline-flex;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.62);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .lang-btn {
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font: 700 12px/1 Inter, sans-serif;
+      transition: .22s ease;
+    }
+    .lang-btn.active {
+      background: linear-gradient(180deg, #f8c9de, #efb0cc);
+      color: #5a2141;
+      border-color: rgba(207, 115, 159, 0.45);
+      box-shadow: 0 10px 24px rgba(207, 115, 159, 0.22);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr .95fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .hero-main {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      right: -110px;
+      top: -150px;
+      background: radial-gradient(circle, rgba(231, 164, 195, 0.42), transparent 70%);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(44px, 8vw, 86px);
+      line-height: .92;
+      letter-spacing: -0.06em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #4b2137 0%, #bb6d95 58%, #f0abc8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.6;
+      margin: 0 0 24px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(207, 115, 159, 0.14);
+    }
+
+    .stat-value {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .stat-label {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hero-side {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: space-between;
+    }
+
+    .side-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      margin-bottom: 6px;
+    }
+
+    .health-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(205, 112, 155, 0.12);
+      font-size: 14px;
+    }
+    .health-item:last-child { border-bottom: 0; }
+
+    .badge-status {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .ok { color: var(--ok); background: rgba(76,155,126,0.12); }
+    .warn { color: var(--warn); background: rgba(197,148,47,0.14); }
+    .danger { color: var(--danger); background: rgba(200,88,115,0.14); }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      border-radius: 999px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: .22s ease;
+    }
+    .tab-btn.active {
+      color: #5a2141;
+      border-color: rgba(207, 115, 159, 0.45);
+      background: linear-gradient(180deg, #ffe3ef, #f7c8dd);
+      box-shadow: 0 10px 24px rgba(207, 115, 159, 0.16);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 18px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .panel {
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title h2, .panel-title h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .panel-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: -4px 0 0;
+    }
+
+    .repo-card, .mini-card {
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(205, 112, 155, 0.15);
+    }
+
+    .repo-name {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .repo-desc, .small-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .mini-pill {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-top: 14px;
+      width: fit-content;
+      color: var(--accent-strong);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(205, 112, 155, 0.12);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    tbody tr:hover td { background: rgba(248, 215, 231, 0.28); }
+
+    .flow-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding-top: 8px;
+    }
+
+    .flow-node {
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(205, 112, 155, 0.16);
+      font: 700 13px/1.2 'JetBrains Mono', monospace;
+      color: #73405b;
+    }
+
+    .flow-arrow {
+      color: var(--accent-strong);
+      font-weight: 800;
+    }
+
+    .phase-list { display: grid; gap: 14px; }
+
+    .phase-item {
+      display: grid;
+      grid-template-columns: 1.6fr auto 210px;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(205, 112, 155, 0.12);
+    }
+    .phase-item:last-child { border-bottom: 0; }
+
+    .phase-meta strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .phase-meta span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .phase-percent {
+      font: 700 14px/1 'JetBrains Mono', monospace;
+      color: var(--accent-strong);
+    }
+
+    .progress-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(205, 112, 155, 0.12);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #efb1cb, #cf739f);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .timeline-step {
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      background: var(--panel-strong);
+      border: 1px solid rgba(205, 112, 155, 0.2);
+      color: var(--accent-strong);
+    }
+
+    .timeline-content {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(205, 112, 155, 0.14);
+    }
+
+    .timeline-content strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .timeline-content span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .footer {
+      margin-top: 26px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 20px 12px 0;
+    }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .phase-item { grid-template-columns: 1fr; }
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .container { padding: 20px 14px 56px; }
+      .hero-main, .hero-side, .panel { padding: 20px; }
+      h1 { font-size: 48px; }
+      .subtitle { font-size: 16px; }
+      th:nth-child(3), td:nth-child(3) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="backdrop"></div>
+  <div class="container">
+    <div class="topbar">
+      <div class="pill" id="metaDate">Structural review · 6 Apr 2026</div>
+      <div class="lang-switcher" aria-label="Language selector">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="card hero-main">
+        <div class="pill" id="heroBadge">Operational architecture</div>
+        <h1 class="gradient-text" id="heroTitle">RED Platform</h1>
+        <p class="subtitle" id="heroSubtitle"></p>
+
+        <div class="hero-grid">
+          <div class="stat">
+            <div class="stat-value">6</div>
+            <div class="stat-label" id="stat1"></div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">92%</div>
+            <div class="stat-label" id="stat2"></div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">33</div>
+            <div class="stat-label" id="stat3"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hero-side">
+        <div>
+          <div class="side-title" id="snapshotTitle"></div>
+          <div class="health-item"><span id="snapshot1Label"></span><span class="badge-status ok" id="snapshot1Value"></span></div>
+          <div class="health-item"><span id="snapshot2Label"></span><span class="badge-status warn" id="snapshot2Value"></span></div>
+          <div class="health-item"><span id="snapshot3Label"></span><span class="badge-status ok" id="snapshot3Value"></span></div>
+          <div class="health-item"><span id="snapshot4Label"></span><span class="badge-status danger" id="snapshot4Value"></span></div>
+        </div>
+        <div class="repo-card">
+          <div class="side-title" id="focusTitle"></div>
+          <div class="small-copy" id="focusCopy"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab-btn active" data-tab="architecture" id="tabArchitecture"></button>
+      <button class="tab-btn" data-tab="roles" id="tabRoles"></button>
+      <button class="tab-btn" data-tab="flow" id="tabFlow"></button>
+      <button class="tab-btn" data-tab="progress" id="tabProgress"></button>
+      <button class="tab-btn" data-tab="plan" id="tabPlan"></button>
+    </nav>
+
+    <section class="section active" id="architecture">
+      <div class="panel card">
+        <div class="panel-title">
+          <div>
+            <h2 id="reposTitle"></h2>
+            <p class="panel-subtitle" id="reposSubtitle"></p>
+          </div>
+        </div>
+        <div class="grid-2" id="repoGrid"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel card">
+          <div class="panel-title"><h3 id="infraTitle"></h3></div>
+          <table>
+            <thead>
+              <tr><th id="thComponent"></th><th id="thTechnology"></th><th id="thHosting"></th></tr>
+            </thead>
+            <tbody id="infraTable"></tbody>
+          </table>
+        </div>
+
+        <div class="panel card">
+          <div class="panel-title"><h3 id="botStructureTitle"></h3></div>
+          <table>
+            <thead>
+              <tr><th id="thModule"></th><th id="thFiles"></th><th id="thFunction"></th></tr>
+            </thead>
+            <tbody id="botStructureTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="roles">
+      <div class="panel card">
+        <div class="panel-title"><h2 id="responsibilityTitle"></h2></div>
+        <table>
+          <thead>
+            <tr><th id="thService"></th><th id="thDoes"></th><th id="thNotDoes"></th></tr>
+          </thead>
+          <tbody id="responsibilityTable"></tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel card">
+          <div class="panel-title"><h3 id="permissionsTitle"></h3></div>
+          <table>
+            <thead>
+              <tr><th id="thAction"></th><th id="thOwner"></th></tr>
+            </thead>
+            <tbody id="permissionsTable"></tbody>
+          </table>
+        </div>
+
+        <div class="panel card">
+          <div class="panel-title"><h3 id="dbAccessTitle"></h3></div>
+          <div class="grid-3" id="dbAccessGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="panel card">
+        <div class="panel-title"><h2 id="mainFlowTitle"></h2></div>
+        <div class="flow-wrap" id="mainFlow1"></div>
+        <div class="flow-wrap" id="mainFlow2"></div>
+        <div class="flow-wrap" id="mainFlow3"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel card">
+          <div class="panel-title"><h3 id="outboundTitle"></h3></div>
+          <div class="small-copy" id="outboundList"></div>
+        </div>
+        <div class="panel card">
+          <div class="panel-title"><h3 id="inboundTitle"></h3></div>
+          <div class="small-copy" id="inboundList"></div>
+        </div>
+      </div>
+
+      <div class="panel card">
+        <div class="panel-title"><h3 id="workflowTitle"></h3></div>
+        <table>
+          <thead>
+            <tr><th id="thWorkflow"></th><th id="thTrigger"></th><th id="thPurpose"></th></tr>
+          </thead>
+          <tbody id="workflowTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="progress">
+      <div class="panel card">
+        <div class="panel-title"><h2 id="phaseProgressTitle"></h2></div>
+        <div class="phase-list" id="phaseList"></div>
+      </div>
+
+      <div class="panel card">
+        <div class="panel-title"><h3 id="issuesTitle"></h3></div>
+        <table>
+          <thead>
+            <tr><th id="thPriority"></th><th id="thIssue"></th><th id="thLocation"></th></tr>
+          </thead>
+          <tbody id="issuesTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="plan">
+      <div class="panel card">
+        <div class="panel-title">
+          <div>
+            <h2 id="planTitle"></h2>
+            <p class="panel-subtitle" id="planSubtitle"></p>
+          </div>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </section>
+
+    <div class="footer" id="footerText"></div>
+  </div>
+
+  <script>
+    const content = {
+      en: {
+        metaDate: 'Structural review · 6 Apr 2026',
+        heroBadge: 'Operational architecture',
+        heroSubtitle: 'Clean multilingual overview of the RED platform architecture, responsibilities, service flow, delivery status, and next implementation steps.',
+        stats: ['Repositories', 'Overall progress', 'TypeScript files'],
+        snapshotTitle: 'Current snapshot',
+        snapshot: [
+          ['Core architecture', 'Stable'],
+          ['Security hardening', 'Pending'],
+          ['Localization', 'Ready'],
+          ['Critical issue', 'Webhook guard']
+        ],
+        focusTitle: 'Main focus',
+        focusCopy: 'The structure is already advanced. The clearest priorities are webhook protection, driver auth via Telegram, Cloud Run secret binding, and one full end-to-end validation across phases 0 to 6.',
+        tabs: ['Architecture', 'Roles', 'Data flow', 'Progress', 'Action plan'],
+        reposTitle: 'Project structure',
+        reposSubtitle: 'Each repository has a clear operational scope to keep the platform modular and easier to maintain.',
+        infraTitle: 'Infrastructure',
+        botStructureTitle: 'Bot source structure',
+        responsibilityTitle: 'Who owns what',
+        permissionsTitle: 'Operational permissions',
+        dbAccessTitle: 'Bot database access',
+        mainFlowTitle: 'Main customer booking flow',
+        outboundTitle: 'Outbound bot connections',
+        inboundTitle: 'Inbound bot connections',
+        workflowTitle: 'Active n8n workflows',
+        phaseProgressTitle: 'Progress by phase',
+        issuesTitle: 'Open issues',
+        planTitle: 'Next execution steps',
+        planSubtitle: 'Ordered from already completed work to the items that still block rollout quality or security.',
+        footerText: 'RED Platform · Structural overview · Updated 6 Apr 2026 · Matthias Dreizler',
+        table: {
+          component: 'Component', technology: 'Technology', hosting: 'Hosting',
+          module: 'Module', files: 'Files', function: 'Purpose',
+          service: 'Service', does: 'Responsible for', notDoes: 'Does not handle',
+          action: 'Action', owner: 'Owner',
+          workflow: 'Workflow', trigger: 'Trigger', purpose: 'Purpose',
+          priority: 'Priority', issue: 'Issue', location: 'Location'
+        },
+        repoTags: ['Bot · Cloud Run', 'API · Cloud Run', 'Admin UI · Netlify', 'Mini App · Netlify', 'Driver App · Netlify', 'Ops'],
+        repos: [
+          ['red-telegram-core', 'Main Telegram bot for customer, companion, and driver flows. Built with grammY, Express, and PostgreSQL.'],
+          ['red-api-gateway', 'Business logic layer for matching, pricing, driver auth, events, and backend coordination.'],
+          ['red-cockpit', 'Administrative dashboard for bookings, companions, drivers, alerts, and overall monitoring.'],
+          ['red-connect_Telegram_WebApp', 'Embedded Telegram web app for customers and companions.'],
+          ['red-qr-partner', 'Partner and driver app for login, transport state, and QR check-in. Moving toward Telegram auth.'],
+          ['red-command', 'Operational scripts, deployment setup, and multi-terminal orchestration.']
+        ],
+        infrastructure: [
+          ['Database', 'PostgreSQL (red_final)', 'Cloud SQL · europe-west1'],
+          ['Bot backend', 'TypeScript · grammY · Express', 'Cloud Run · europe-west1'],
+          ['API gateway', 'Node.js · Express', 'Cloud Run · europe-west1'],
+          ['Automation', 'n8n workflows (webhooks + timers)', 'n8n Cloud (iva-it.app)'],
+          ['Frontends ×3', 'React · Vite', 'Netlify'],
+          ['VPC', 'red-connector', 'Private ranges only']
+        ],
+        botStructure: [
+          ['bot/handlers/', 'phase0–7, chat.ts', 'Conversation handlers organized by phase.'],
+          ['bot/middleware/', 'session.ts', 'Bot session management.'],
+          ['db/', '7 files', 'Pool plus sessions, bookings, users, hostesses, events, and texts.'],
+          ['flows/', 'state-machine.ts', 'registerStep and dispatchCallback orchestration.'],
+          ['n8n/', 'handlers.ts, router.ts', '31 idempotent actions for automation routing.'],
+          ['services/', '4 files', 'Cache, matching, pricing, and earnings services.'],
+          ['utils/', '5 files', 'Auth, rate limiting, validation, IP whitelist, idempotency.']
+        ],
+        responsibilities: [
+          ['Bot', 'Telegram UX, sessions, button callbacks, user input capture, photo sending.', 'Matching, pricing, DB schema changes, deploys, Git operations.'],
+          ['Gateway', 'Matching, pricing, driver auth, event routing, alarms, core business rules.', 'Direct Telegram messaging and bot session state.'],
+          ['n8n', 'Timers, warnings, snoozes, and scheduled webhook orchestration.', 'Core business logic and direct database ownership.'],
+          ['Cockpit', 'Visual admin control for bookings, companions, drivers, and alerts.', 'Backend logic and direct database access.'],
+          ['Mini Apps', 'Embedded Telegram interfaces for customers and drivers.', 'Business rules or independent persistence.']
+        ],
+        permissions: [
+          ['git push', 'Matthias only'],
+          ['gcloud deploy', 'Matthias only'],
+          ['DB schema changes', 'Matthias only (SCHEMA)'],
+          ['Secrets management', 'Matthias only (VAULT)'],
+          ['n8n import/publish', 'Matthias only'],
+          ['BotFather config', 'Matthias only']
+        ],
+        dbAccess: [
+          ['Read + write', 'bot_sessions, bot_answers, bot_bookings, booking_match_candidates, chat_messages, alarms, hostesses, persons, hostess_availability'],
+          ['Read only', 'bot_texts (600s cache), driver_assignments, distribution_control_config, drivers (JOIN)'],
+          ['Write only', 'bot_events, booking_ratings, hostess_payouts']
+        ],
+        flows: [
+          ['Telegram', 'Bot /webhook', 'Phase 0 (Language/NDA)', 'Phase 1 (Booking)', 'Gateway /matching', 'Phase 1b (Match)'],
+          ['Phase 1b', 'Phase 2 (Companion)', 'Phase 3 (Meeting)', 'n8n timers', 'Phase 4 (Driver)'],
+          ['Phase 4', 'Phase 5 (Rating)', 'Phase 6 (Support)', 'Gateway /events', 'PostgreSQL']
+        ],
+        outbound: [
+          'POST /events/trigger → Gateway (23 events)',
+          'POST /matching/find → Gateway',
+          'POST /pricing/calculate → Gateway',
+          'n8n key-photo-schedule → n8n',
+          'n8n meeting-lifecycle → n8n',
+          'n8n customer-time-warning → n8n',
+          'n8n customer-warning-snooze → n8n'
+        ],
+        inbound: [
+          'POST /webhook ← Telegram updates',
+          'POST /n8n/event ← n8n (31 actions)',
+          'GET /health ← monitoring',
+          '[NEW] POST /webhook-driver ← RedDriverBot'
+        ],
+        workflows: [
+          ['Kunde Zeitwarnung v2', '/webhook/customer-time-warning', '2h warning, 60 min follow-up, final alert, arriving soon event, auto-cancel flow.'],
+          ['Kunde Warning Snooze', '/webhook/customer-warning-snooze', '30 min snooze, re-check, and warning resend.'],
+          ['Key Photo Schedule', '/webhook/key-photo-schedule', 'Schedules key meeting photo reminders.'],
+          ['Meeting Lifecycle', '/webhook/meeting-lifecycle', 'Controls overall meeting duration.']
+        ],
+        phases: [
+          ['Phase 0 — Language / NDA / Role', 100, 'Completed'],
+          ['Phase 1 — Customer booking', 95, 'FAQ button returns null in phase1.ts:316'],
+          ['Phase 1b — Matching', 90, 'Pagination pending in phase1b.ts:173'],
+          ['Phase 2 — Companion', 85, 'Calendar pending in phase2.ts:994'],
+          ['Phase 3 — Meeting start', 95, 'Completed'],
+          ['Phase 4 — Driver / Transport', 90, 'Geolocation pending in phase4.ts:522'],
+          ['Phase 5/6 — Rating / Support', 95, 'Completed'],
+          ['Security', 85, 'S1: webhook can be unprotected'],
+          ['i18n (DE/EN/ES)', 99, 'Completed']
+        ],
+        issues: [
+          ['P1 Critical', 'Webhook is unprotected if TELEGRAM_SECRET_TOKEN is undefined.', 'telegram-auth.ts:7-9'],
+          ['P2 Important', 'A full E2E test from phases 0 to 6 has not been executed yet.', '—'],
+          ['P3 Optional', 'FAQ menu returns null.', 'phase1.ts:316'],
+          ['P3 Optional', 'Matching pagination pending.', 'phase1b.ts:173'],
+          ['P3 Optional', 'Companion calendar pending.', 'phase2.ts:994'],
+          ['P3 Optional', 'Mini app geolocation pending.', 'phase4.ts:522']
+        ],
+        plan: [
+          ['✓', 'Gateway + bot deployed', 'Gateway revision red-api-gateway-00175-fk5 and bot commit 9784eaf already deployed.'],
+          ['✓', 'n8n workflows imported and published', 'Kunde Zeitwarnung v2 and Kunde Warning Snooze are active.'],
+          ['✓', 'Secrets created', 'RED_DRIVER_BOT_TOKEN and TELEGRAM_DRIVER_SECRET_TOKEN already exist in Secret Manager.'],
+          ['4', 'Bind secrets to Cloud Run', 'Gateway needs RED_DRIVER_BOT_TOKEN. Bot needs RED_DRIVER_BOT_TOKEN and TELEGRAM_DRIVER_SECRET_TOKEN.'],
+          ['5', 'Gateway: POST /api/driver/auth/telegram', 'Implement HMAC-SHA256 validation for initData, driver lookup, and session token generation.'],
+          ['6', 'Bot: RedDriverBot integration', 'Add second grammY instance, driver start flow, menu button, and /webhook-driver endpoint.'],
+          ['7', 'QR Partner: silent Telegram auth', 'Replace email/password login with initData → Gateway → automatic session creation.'],
+          ['8', 'Fix TELEGRAM_BOT_URL → BOT_SERVICE_URL', 'Update gateway references in notify.js, emergency.js, and miniapp-api.js.'],
+          ['9', 'Secure webhook when TELEGRAM_SECRET_TOKEN is missing', 'Reject requests if the secret token is not configured.'],
+          ['10', 'Run full E2E validation', 'Test phases 0 → 1 → 1b → 3 → 4 → 5 → 6 with two real Telegram accounts.']
+        ]
+      },
+      es: {
+        metaDate: 'Revisión estructural · 6 Abr 2026',
+        heroBadge: 'Arquitectura operativa',
+        heroSubtitle: 'Vista multilingüe y más clara de la arquitectura de RED, sus responsabilidades, el flujo de servicios, el estado actual y los próximos pasos de implementación.',
+        stats: ['Repositorios', 'Progreso global', 'Archivos TypeScript'],
+        snapshotTitle: 'Resumen actual',
+        snapshot: [
+          ['Arquitectura base', 'Estable'],
+          ['Refuerzo de seguridad', 'Pendiente'],
+          ['Localización', 'Lista'],
+          ['Punto crítico', 'Protección webhook']
+        ],
+        focusTitle: 'Foco principal',
+        focusCopy: 'La estructura ya está bastante avanzada. Las prioridades más claras son proteger el webhook, terminar la autenticación de drivers por Telegram, vincular secretos en Cloud Run y ejecutar una validación end-to-end completa de las fases 0 a 6.',
+        tabs: ['Arquitectura', 'Roles', 'Flujo de datos', 'Progreso', 'Plan de acción'],
+        reposTitle: 'Estructura del proyecto',
+        reposSubtitle: 'Cada repositorio tiene un alcance operativo definido para mantener el sistema modular y más fácil de escalar o mantener.',
+        infraTitle: 'Infraestructura',
+        botStructureTitle: 'Estructura fuente del bot',
+        responsibilityTitle: 'Qué hace cada servicio',
+        permissionsTitle: 'Permisos operativos',
+        dbAccessTitle: 'Acceso del bot a base de datos',
+        mainFlowTitle: 'Flujo principal de reserva del cliente',
+        outboundTitle: 'Conexiones salientes del bot',
+        inboundTitle: 'Conexiones entrantes del bot',
+        workflowTitle: 'Workflows n8n activos',
+        phaseProgressTitle: 'Progreso por fase',
+        issuesTitle: 'Problemas abiertos',
+        planTitle: 'Próximos pasos de ejecución',
+        planSubtitle: 'Ordenado desde lo ya completado hasta lo que todavía bloquea calidad de despliegue o seguridad.',
+        footerText: 'RED Platform · Vista estructural · Actualizado 6 Abr 2026 · Matthias Dreizler',
+        table: {
+          component: 'Componente', technology: 'Tecnología', hosting: 'Hosting',
+          module: 'Módulo', files: 'Archivos', function: 'Función',
+          service: 'Servicio', does: 'Responsable de', notDoes: 'No gestiona',
+          action: 'Acción', owner: 'Responsable',
+          workflow: 'Workflow', trigger: 'Trigger', purpose: 'Función',
+          priority: 'Prioridad', issue: 'Problema', location: 'Ubicación'
+        },
+        repoTags: ['Bot · Cloud Run', 'API · Cloud Run', 'Admin UI · Netlify', 'Mini App · Netlify', 'App Driver · Netlify', 'Ops'],
+        repos: [
+          ['red-telegram-core', 'Bot principal de Telegram para flujos de cliente, acompañante y conductor. Construido con grammY, Express y PostgreSQL.'],
+          ['red-api-gateway', 'Capa de lógica de negocio para matching, pricing, autenticación de drivers, eventos y coordinación backend.'],
+          ['red-cockpit', 'Dashboard administrativo para reservas, acompañantes, conductores, alertas y control general.'],
+          ['red-connect_Telegram_WebApp', 'Mini app web embebida en Telegram para clientes y acompañantes.'],
+          ['red-qr-partner', 'App de partners y conductores para login, estado de transporte y QR check-in. En transición a auth por Telegram.'],
+          ['red-command', 'Scripts operativos, configuración de despliegue y orquestación multi-terminal.']
+        ],
+        infrastructure: [
+          ['Base de datos', 'PostgreSQL (red_final)', 'Cloud SQL · europe-west1'],
+          ['Backend del bot', 'TypeScript · grammY · Express', 'Cloud Run · europe-west1'],
+          ['API gateway', 'Node.js · Express', 'Cloud Run · europe-west1'],
+          ['Automatización', 'Workflows n8n (webhooks + timers)', 'n8n Cloud (iva-it.app)'],
+          ['Frontends ×3', 'React · Vite', 'Netlify'],
+          ['VPC', 'red-connector', 'Solo rangos privados']
+        ],
+        botStructure: [
+          ['bot/handlers/', 'phase0–7, chat.ts', 'Handlers conversacionales organizados por fase.'],
+          ['bot/middleware/', 'session.ts', 'Gestión de sesiones del bot.'],
+          ['db/', '7 archivos', 'Pool y capas para sessions, bookings, users, hostesses, events y texts.'],
+          ['flows/', 'state-machine.ts', 'Orquestación de registerStep y dispatchCallback.'],
+          ['n8n/', 'handlers.ts, router.ts', '31 acciones idempotentes para automatizaciones.'],
+          ['services/', '4 archivos', 'Servicios de cache, matching, pricing y earnings.'],
+          ['utils/', '5 archivos', 'Auth, rate limiting, validación, IP whitelist e idempotencia.']
+        ],
+        responsibilities: [
+          ['Bot', 'UX en Telegram, sesiones, callbacks, captura de datos del usuario y envío de fotos.', 'Matching, pricing, cambios de esquema DB, deploys y Git.'],
+          ['Gateway', 'Matching, pricing, auth de drivers, event routing, alarmas y reglas de negocio.', 'Mensajería directa por Telegram y estado de sesión del bot.'],
+          ['n8n', 'Timers, warnings, snoozes y orquestación temporal por webhooks.', 'Lógica principal de negocio y ownership directo de DB.'],
+          ['Cockpit', 'Control visual administrativo de reservas, acompañantes, conductores y alertas.', 'Lógica backend y acceso directo a base de datos.'],
+          ['Mini Apps', 'Interfaces embebidas en Telegram para clientes y conductores.', 'Reglas de negocio o persistencia propia.']
+        ],
+        permissions: [
+          ['git push', 'Solo Matthias'],
+          ['gcloud deploy', 'Solo Matthias'],
+          ['Cambios de esquema DB', 'Solo Matthias (SCHEMA)'],
+          ['Gestión de secretos', 'Solo Matthias (VAULT)'],
+          ['Import / publish n8n', 'Solo Matthias'],
+          ['Config BotFather', 'Solo Matthias']
+        ],
+        dbAccess: [
+          ['Lectura + escritura', 'bot_sessions, bot_answers, bot_bookings, booking_match_candidates, chat_messages, alarms, hostesses, persons, hostess_availability'],
+          ['Solo lectura', 'bot_texts (cache 600s), driver_assignments, distribution_control_config, drivers (JOIN)'],
+          ['Solo escritura', 'bot_events, booking_ratings, hostess_payouts']
+        ],
+        flows: [
+          ['Telegram', 'Bot /webhook', 'Phase 0 (Idioma/NDA)', 'Phase 1 (Reserva)', 'Gateway /matching', 'Phase 1b (Match)'],
+          ['Phase 1b', 'Phase 2 (Acompañante)', 'Phase 3 (Meeting)', 'Timers n8n', 'Phase 4 (Driver)'],
+          ['Phase 4', 'Phase 5 (Valoración)', 'Phase 6 (Soporte)', 'Gateway /events', 'PostgreSQL']
+        ],
+        outbound: [
+          'POST /events/trigger → Gateway (23 eventos)',
+          'POST /matching/find → Gateway',
+          'POST /pricing/calculate → Gateway',
+          'n8n key-photo-schedule → n8n',
+          'n8n meeting-lifecycle → n8n',
+          'n8n customer-time-warning → n8n',
+          'n8n customer-warning-snooze → n8n'
+        ],
+        inbound: [
+          'POST /webhook ← updates de Telegram',
+          'POST /n8n/event ← n8n (31 acciones)',
+          'GET /health ← monitorización',
+          '[NUEVO] POST /webhook-driver ← RedDriverBot'
+        ],
+        workflows: [
+          ['Kunde Zeitwarnung v2', '/webhook/customer-time-warning', 'Aviso a 2h, seguimiento a 60 min, alerta final, evento arriving soon y auto-cancelación.'],
+          ['Kunde Warning Snooze', '/webhook/customer-warning-snooze', 'Snooze de 30 min, revisión y reenvío del aviso.'],
+          ['Key Photo Schedule', '/webhook/key-photo-schedule', 'Programa recordatorios para fotos clave del meeting.'],
+          ['Meeting Lifecycle', '/webhook/meeting-lifecycle', 'Controla la duración total del meeting.']
+        ],
+        phases: [
+          ['Phase 0 — Idioma / NDA / Rol', 100, 'Completado'],
+          ['Phase 1 — Reserva cliente', 95, 'El botón FAQ devuelve null en phase1.ts:316'],
+          ['Phase 1b — Matching', 90, 'Paginación pendiente en phase1b.ts:173'],
+          ['Phase 2 — Acompañante', 85, 'Calendario pendiente en phase2.ts:994'],
+          ['Phase 3 — Inicio meeting', 95, 'Completado'],
+          ['Phase 4 — Conductor / Transporte', 90, 'Geolocalización pendiente en phase4.ts:522'],
+          ['Phase 5/6 — Rating / Soporte', 95, 'Completado'],
+          ['Seguridad', 85, 'S1: webhook puede quedar sin protección'],
+          ['i18n (DE/EN/ES)', 99, 'Completado']
+        ],
+        issues: [
+          ['P1 Crítico', 'El webhook queda desprotegido si TELEGRAM_SECRET_TOKEN no está definido.', 'telegram-auth.ts:7-9'],
+          ['P2 Importante', 'Aún no se ha ejecutado un test E2E completo desde la fase 0 hasta la 6.', '—'],
+          ['P3 Opcional', 'El menú FAQ devuelve null.', 'phase1.ts:316'],
+          ['P3 Opcional', 'Falta la paginación del matching.', 'phase1b.ts:173'],
+          ['P3 Opcional', 'Falta el calendario de la acompañante.', 'phase2.ts:994'],
+          ['P3 Opcional', 'Falta la geolocalización en la mini app.', 'phase4.ts:522']
+        ],
+        plan: [
+          ['✓', 'Gateway + bot desplegados', 'La revisión red-api-gateway-00175-fk5 y el commit 9784eaf del bot ya están desplegados.'],
+          ['✓', 'Workflows n8n importados y publicados', 'Kunde Zeitwarnung v2 y Kunde Warning Snooze están activos.'],
+          ['✓', 'Secrets creados', 'RED_DRIVER_BOT_TOKEN y TELEGRAM_DRIVER_SECRET_TOKEN ya existen en Secret Manager.'],
+          ['4', 'Vincular secretos a Cloud Run', 'Gateway necesita RED_DRIVER_BOT_TOKEN. El bot necesita RED_DRIVER_BOT_TOKEN y TELEGRAM_DRIVER_SECRET_TOKEN.'],
+          ['5', 'Gateway: POST /api/driver/auth/telegram', 'Implementar validación HMAC-SHA256 de initData, lookup de driver y generación de session token.'],
+          ['6', 'Bot: integración RedDriverBot', 'Añadir segunda instancia grammY, flujo de inicio para driver, menu button y endpoint /webhook-driver.'],
+          ['7', 'QR Partner: auth silenciosa por Telegram', 'Sustituir login email/password por initData → Gateway → creación automática de sesión.'],
+          ['8', 'Corregir TELEGRAM_BOT_URL → BOT_SERVICE_URL', 'Actualizar referencias del gateway en notify.js, emergency.js y miniapp-api.js.'],
+          ['9', 'Proteger webhook si falta TELEGRAM_SECRET_TOKEN', 'Rechazar peticiones si el secret token no está configurado.'],
+          ['10', 'Ejecutar validación E2E completa', 'Probar fases 0 → 1 → 1b → 3 → 4 → 5 → 6 con dos cuentas reales de Telegram.']
+        ]
+      },
+      de: {
+        metaDate: 'Strukturprüfung · 6. Apr. 2026',
+        heroBadge: 'Betriebsarchitektur',
+        heroSubtitle: 'Klare mehrsprachige Übersicht zur RED-Plattform: Architektur, Verantwortlichkeiten, Datenfluss, Umsetzungsstand und nächste Schritte.',
+        stats: ['Repositories', 'Gesamtfortschritt', 'TypeScript-Dateien'],
+        snapshotTitle: 'Aktueller Stand',
+        snapshot: [
+          ['Kernarchitektur', 'Stabil'],
+          ['Security-Härtung', 'Offen'],
+          ['Lokalisierung', 'Bereit'],
+          ['Kritischer Punkt', 'Webhook-Schutz']
+        ],
+        focusTitle: 'Hauptfokus',
+        focusCopy: 'Die Grundstruktur ist bereits weit entwickelt. Die wichtigsten Prioritäten sind Webhook-Schutz, Telegram-Authentifizierung für Fahrer, Secret-Bindings in Cloud Run und ein vollständiger End-to-End-Test über die Phasen 0 bis 6.',
+        tabs: ['Architektur', 'Rollen', 'Datenfluss', 'Fortschritt', 'Aktionsplan'],
+        reposTitle: 'Projektstruktur',
+        reposSubtitle: 'Jedes Repository hat einen klaren operativen Zweck, damit die Plattform modular und wartbar bleibt.',
+        infraTitle: 'Infrastruktur',
+        botStructureTitle: 'Bot-Quellstruktur',
+        responsibilityTitle: 'Wer macht was',
+        permissionsTitle: 'Operative Berechtigungen',
+        dbAccessTitle: 'Datenbankzugriff des Bots',
+        mainFlowTitle: 'Hauptfluss der Kundenbuchung',
+        outboundTitle: 'Ausgehende Bot-Verbindungen',
+        inboundTitle: 'Eingehende Bot-Verbindungen',
+        workflowTitle: 'Aktive n8n-Workflows',
+        phaseProgressTitle: 'Fortschritt nach Phase',
+        issuesTitle: 'Offene Punkte',
+        planTitle: 'Nächste Umsetzungsschritte',
+        planSubtitle: 'Sortiert von bereits erledigten Punkten bis zu den verbleibenden Sicherheits- und Rollout-Blockern.',
+        footerText: 'RED Platform · Strukturübersicht · Aktualisiert 6. Apr. 2026 · Matthias Dreizler',
+        table: {
+          component: 'Komponente', technology: 'Technologie', hosting: 'Hosting',
+          module: 'Modul', files: 'Dateien', function: 'Funktion',
+          service: 'Service', does: 'Verantwortlich für', notDoes: 'Nicht zuständig für',
+          action: 'Aktion', owner: 'Verantwortlich',
+          workflow: 'Workflow', trigger: 'Trigger', purpose: 'Zweck',
+          priority: 'Priorität', issue: 'Problem', location: 'Ort'
+        },
+        repoTags: ['Bot · Cloud Run', 'API · Cloud Run', 'Admin UI · Netlify', 'Mini App · Netlify', 'Driver App · Netlify', 'Ops'],
+        repos: [
+          ['red-telegram-core', 'Haupt-Telegram-Bot für Kunden-, Begleiter- und Fahrer-Flows. Gebaut mit grammY, Express und PostgreSQL.'],
+          ['red-api-gateway', 'Business-Logik für Matching, Pricing, Fahrer-Auth, Events und Backend-Koordination.'],
+          ['red-cockpit', 'Admin-Dashboard für Buchungen, Begleiter, Fahrer, Alerts und Gesamtüberblick.'],
+          ['red-connect_Telegram_WebApp', 'Eingebettete Telegram-Web-App für Kunden und Begleiter.'],
+          ['red-qr-partner', 'Partner- und Fahrer-App für Login, Transportstatus und QR-Check-in. Wechsel auf Telegram-Auth läuft.'],
+          ['red-command', 'Operative Skripte, Deployment-Setup und Multi-Terminal-Orchestrierung.']
+        ],
+        infrastructure: [
+          ['Datenbank', 'PostgreSQL (red_final)', 'Cloud SQL · europe-west1'],
+          ['Bot-Backend', 'TypeScript · grammY · Express', 'Cloud Run · europe-west1'],
+          ['API-Gateway', 'Node.js · Express', 'Cloud Run · europe-west1'],
+          ['Automatisierung', 'n8n-Workflows (Webhooks + Timer)', 'n8n Cloud (iva-it.app)'],
+          ['Frontends ×3', 'React · Vite', 'Netlify'],
+          ['VPC', 'red-connector', 'Nur private Bereiche']
+        ],
+        botStructure: [
+          ['bot/handlers/', 'phase0–7, chat.ts', 'Konversations-Handler nach Phasen organisiert.'],
+          ['bot/middleware/', 'session.ts', 'Session-Verwaltung des Bots.'],
+          ['db/', '7 Dateien', 'Pool sowie Ebenen für sessions, bookings, users, hostesses, events und texts.'],
+          ['flows/', 'state-machine.ts', 'Orchestrierung von registerStep und dispatchCallback.'],
+          ['n8n/', 'handlers.ts, router.ts', '31 idempotente Aktionen für Automatisierung.'],
+          ['services/', '4 Dateien', 'Services für Cache, Matching, Pricing und Earnings.'],
+          ['utils/', '5 Dateien', 'Auth, Rate Limiting, Validierung, IP-Whitelist, Idempotenz.']
+        ],
+        responsibilities: [
+          ['Bot', 'Telegram-UX, Sessions, Button-Callbacks, Erfassung von Nutzerdaten und Versand von Fotos.', 'Matching, Pricing, DB-Schema-Änderungen, Deployments und Git.'],
+          ['Gateway', 'Matching, Pricing, Fahrer-Auth, Event-Routing, Alarme und zentrale Business-Regeln.', 'Direkte Telegram-Nachrichten und Bot-Session-State.'],
+          ['n8n', 'Timer, Warnings, Snoozes und zeitgesteuerte Webhook-Orchestrierung.', 'Kernlogik des Geschäfts und direkte DB-Verantwortung.'],
+          ['Cockpit', 'Visuelle Admin-Steuerung für Buchungen, Begleiter, Fahrer und Alerts.', 'Backend-Logik und direkter Datenbankzugriff.'],
+          ['Mini Apps', 'Eingebettete Telegram-Oberflächen für Kunden und Fahrer.', 'Business-Regeln oder eigene Persistenz.']
+        ],
+        permissions: [
+          ['git push', 'Nur Matthias'],
+          ['gcloud deploy', 'Nur Matthias'],
+          ['DB-Schema-Änderungen', 'Nur Matthias (SCHEMA)'],
+          ['Secret-Management', 'Nur Matthias (VAULT)'],
+          ['n8n Import/Publish', 'Nur Matthias'],
+          ['BotFather-Konfiguration', 'Nur Matthias']
+        ],
+        dbAccess: [
+          ['Lesen + schreiben', 'bot_sessions, bot_answers, bot_bookings, booking_match_candidates, chat_messages, alarms, hostesses, persons, hostess_availability'],
+          ['Nur lesen', 'bot_texts (600s Cache), driver_assignments, distribution_control_config, drivers (JOIN)'],
+          ['Nur schreiben', 'bot_events, booking_ratings, hostess_payouts']
+        ],
+        flows: [
+          ['Telegram', 'Bot /webhook', 'Phase 0 (Sprache/NDA)', 'Phase 1 (Buchung)', 'Gateway /matching', 'Phase 1b (Match)'],
+          ['Phase 1b', 'Phase 2 (Begleiter)', 'Phase 3 (Meeting)', 'n8n-Timer', 'Phase 4 (Fahrer)'],
+          ['Phase 4', 'Phase 5 (Bewertung)', 'Phase 6 (Support)', 'Gateway /events', 'PostgreSQL']
+        ],
+        outbound: [
+          'POST /events/trigger → Gateway (23 Events)',
+          'POST /matching/find → Gateway',
+          'POST /pricing/calculate → Gateway',
+          'n8n key-photo-schedule → n8n',
+          'n8n meeting-lifecycle → n8n',
+          'n8n customer-time-warning → n8n',
+          'n8n customer-warning-snooze → n8n'
+        ],
+        inbound: [
+          'POST /webhook ← Telegram-Updates',
+          'POST /n8n/event ← n8n (31 Aktionen)',
+          'GET /health ← Monitoring',
+          '[NEU] POST /webhook-driver ← RedDriverBot'
+        ],
+        workflows: [
+          ['Kunde Zeitwarnung v2', '/webhook/customer-time-warning', '2h-Warnung, Follow-up nach 60 Min., finale Meldung, arriving soon Event und Auto-Cancel-Ablauf.'],
+          ['Kunde Warning Snooze', '/webhook/customer-warning-snooze', '30-Min.-Snooze, erneute Prüfung und erneuter Versand.'],
+          ['Key Photo Schedule', '/webhook/key-photo-schedule', 'Plant Erinnerungen für wichtige Meeting-Fotos.'],
+          ['Meeting Lifecycle', '/webhook/meeting-lifecycle', 'Steuert die Gesamtdauer des Meetings.']
+        ],
+        phases: [
+          ['Phase 0 — Sprache / NDA / Rolle', 100, 'Abgeschlossen'],
+          ['Phase 1 — Kundenbuchung', 95, 'FAQ-Button gibt null zurück in phase1.ts:316'],
+          ['Phase 1b — Matching', 90, 'Paginierung offen in phase1b.ts:173'],
+          ['Phase 2 — Begleiter', 85, 'Kalender offen in phase2.ts:994'],
+          ['Phase 3 — Meeting-Start', 95, 'Abgeschlossen'],
+          ['Phase 4 — Fahrer / Transport', 90, 'Geolokalisierung offen in phase4.ts:522'],
+          ['Phase 5/6 — Bewertung / Support', 95, 'Abgeschlossen'],
+          ['Sicherheit', 85, 'S1: Webhook kann ungeschützt sein'],
+          ['i18n (DE/EN/ES)', 99, 'Abgeschlossen']
+        ],
+        issues: [
+          ['P1 Kritisch', 'Webhook ist ungeschützt, wenn TELEGRAM_SECRET_TOKEN nicht definiert ist.', 'telegram-auth.ts:7-9'],
+          ['P2 Wichtig', 'Ein vollständiger E2E-Test über Phase 0 bis 6 wurde noch nicht ausgeführt.', '—'],
+          ['P3 Optional', 'FAQ-Menü gibt null zurück.', 'phase1.ts:316'],
+          ['P3 Optional', 'Matching-Paginierung offen.', 'phase1b.ts:173'],
+          ['P3 Optional', 'Kalender für Begleiter offen.', 'phase2.ts:994'],
+          ['P3 Optional', 'Geolokalisierung in der Mini App offen.', 'phase4.ts:522']
+        ],
+        plan: [
+          ['✓', 'Gateway + Bot deployed', 'Die Gateway-Revision red-api-gateway-00175-fk5 und Bot-Commit 9784eaf sind bereits live.'],
+          ['✓', 'n8n-Workflows importiert und veröffentlicht', 'Kunde Zeitwarnung v2 und Kunde Warning Snooze sind aktiv.'],
+          ['✓', 'Secrets erstellt', 'RED_DRIVER_BOT_TOKEN und TELEGRAM_DRIVER_SECRET_TOKEN existieren bereits im Secret Manager.'],
+          ['4', 'Secrets an Cloud Run binden', 'Gateway benötigt RED_DRIVER_BOT_TOKEN. Der Bot benötigt RED_DRIVER_BOT_TOKEN und TELEGRAM_DRIVER_SECRET_TOKEN.'],
+          ['5', 'Gateway: POST /api/driver/auth/telegram', 'HMAC-SHA256-Prüfung für initData, Fahrer-Lookup und Session-Token-Generierung implementieren.'],
+          ['6', 'Bot: RedDriverBot-Integration', 'Zweite grammY-Instanz, Fahrer-Startflow, Menü-Button und /webhook-driver-Endpunkt ergänzen.'],
+          ['7', 'QR Partner: stille Telegram-Auth', 'Email/Passwort-Login durch initData → Gateway → automatische Session ersetzen.'],
+          ['8', 'TELEGRAM_BOT_URL → BOT_SERVICE_URL korrigieren', 'Gateway-Referenzen in notify.js, emergency.js und miniapp-api.js aktualisieren.'],
+          ['9', 'Webhook absichern, falls TELEGRAM_SECRET_TOKEN fehlt', 'Requests ablehnen, wenn kein Secret-Token konfiguriert ist.'],
+          ['10', 'Vollständigen E2E-Test ausführen', 'Phasen 0 → 1 → 1b → 3 → 4 → 5 → 6 mit zwei echten Telegram-Konten testen.']
+        ]
+      }
+    };
+
+    let currentLang = 'en';
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function renderRows(targetId, rows) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('');
+    }
+
+    function renderRepoGrid(data) {
+      const grid = document.getElementById('repoGrid');
+      grid.innerHTML = data.repos.map((repo, index) => `
+        <article class="repo-card">
+          <div class="repo-name">${repo[0]}</div>
+          <div class="repo-desc">${repo[1]}</div>
+          <div class="mini-pill">${data.repoTags[index]}</div>
+        </article>
+      `).join('');
+    }
+
+    function renderDbAccess(data) {
+      const grid = document.getElementById('dbAccessGrid');
+      grid.innerHTML = data.dbAccess.map(group => `
+        <div class="mini-card">
+          <div class="side-title">${group[0]}</div>
+          <div class="small-copy">${group[1]}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderFlow(targetId, steps) {
+      const wrap = document.getElementById(targetId);
+      wrap.innerHTML = steps.map((step, index) => `
+        ${index > 0 ? '<span class="flow-arrow">→</span>' : ''}
+        <span class="flow-node">${step}</span>
+      `).join('');
+    }
+
+    function renderListWithBreaks(targetId, items) {
+      document.getElementById(targetId).innerHTML = items.join('<br>');
+    }
+
+    function renderPhases(data) {
+      const list = document.getElementById('phaseList');
+      list.innerHTML = data.phases.map(phase => `
+        <div class="phase-item">
+          <div class="phase-meta">
+            <strong>${phase[0]}</strong>
+            <span>${phase[2]}</span>
+          </div>
+          <div class="phase-percent">${phase[1]}%</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${phase[1]}%"></div></div>
+        </div>
+      `).join('');
+    }
+
+    function renderTimeline(data) {
+      const timeline = document.getElementById('timeline');
+      timeline.innerHTML = data.plan.map(item => `
+        <div class="timeline-item">
+          <div class="timeline-step">${item[0]}</div>
+          <div class="timeline-content">
+            <strong>${item[1]}</strong>
+            <span>${item[2]}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderLanguage(lang) {
+      currentLang = lang;
+      const data = content[lang];
+      document.documentElement.lang = lang;
+
+      setText('metaDate', data.metaDate);
+      setText('heroBadge', data.heroBadge);
+      setText('heroSubtitle', data.heroSubtitle);
+      setText('stat1', data.stats[0]);
+      setText('stat2', data.stats[1]);
+      setText('stat3', data.stats[2]);
+      setText('snapshotTitle', data.snapshotTitle);
+      setText('snapshot1Label', data.snapshot[0][0]);
+      setText('snapshot1Value', data.snapshot[0][1]);
+      setText('snapshot2Label', data.snapshot[1][0]);
+      setText('snapshot2Value', data.snapshot[1][1]);
+      setText('snapshot3Label', data.snapshot[2][0]);
+      setText('snapshot3Value', data.snapshot[2][1]);
+      setText('snapshot4Label', data.snapshot[3][0]);
+      setText('snapshot4Value', data.snapshot[3][1]);
+      setText('focusTitle', data.focusTitle);
+      setText('focusCopy', data.focusCopy);
+
+      setText('tabArchitecture', data.tabs[0]);
+      setText('tabRoles', data.tabs[1]);
+      setText('tabFlow', data.tabs[2]);
+      setText('tabProgress', data.tabs[3]);
+      setText('tabPlan', data.tabs[4]);
+
+      setText('reposTitle', data.reposTitle);
+      setText('reposSubtitle', data.reposSubtitle);
+      setText('infraTitle', data.infraTitle);
+      setText('botStructureTitle', data.botStructureTitle);
+      setText('responsibilityTitle', data.responsibilityTitle);
+      setText('permissionsTitle', data.permissionsTitle);
+      setText('dbAccessTitle', data.dbAccessTitle);
+      setText('mainFlowTitle', data.mainFlowTitle);
+      setText('outboundTitle', data.outboundTitle);
+      setText('inboundTitle', data.inboundTitle);
+      setText('workflowTitle', data.workflowTitle);
+      setText('phaseProgressTitle', data.phaseProgressTitle);
+      setText('issuesTitle', data.issuesTitle);
+      setText('planTitle', data.planTitle);
+      setText('planSubtitle', data.planSubtitle);
+      setText('footerText', data.footerText);
+
+      setText('thComponent', data.table.component);
+      setText('thTechnology', data.table.technology);
+      setText('thHosting', data.table.hosting);
+      setText('thModule', data.table.module);
+      setText('thFiles', data.table.files);
+      setText('thFunction', data.table.function);
+      setText('thService', data.table.service);
+      setText('thDoes', data.table.does);
+      setText('thNotDoes', data.table.notDoes);
+      setText('thAction', data.table.action);
+      setText('thOwner', data.table.owner);
+      setText('thWorkflow', data.table.workflow);
+      setText('thTrigger', data.table.trigger);
+      setText('thPurpose', data.table.purpose);
+      setText('thPriority', data.table.priority);
+      setText('thIssue', data.table.issue);
+      setText('thLocation', data.table.location);
+
+      renderRepoGrid(data);
+      renderRows('infraTable', data.infrastructure);
+      renderRows('botStructureTable', data.botStructure);
+      renderRows('responsibilityTable', data.responsibilities);
+      renderRows('permissionsTable', data.permissions);
+      renderDbAccess(data);
+      renderFlow('mainFlow1', data.flows[0]);
+      renderFlow('mainFlow2', data.flows[1]);
+      renderFlow('mainFlow3', data.flows[2]);
+      renderListWithBreaks('outboundList', data.outbound);
+      renderListWithBreaks('inboundList', data.inbound);
+      renderRows('workflowTable', data.workflows);
+      renderPhases(data);
+      renderRows('issuesTable', data.issues);
+      renderTimeline(data);
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => renderLanguage(btn.dataset.lang));
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    renderLanguage('en');
+  </script>
+</body>
+</html>
